@@ -18,7 +18,8 @@ class CalculatorViewController: UIViewController {
     
     var selectedTip: Double = 0.10
     var totalBill: Double = 0.0
-    var numberOfPpl = 2
+    var numberOfPpl: Int = 2
+    var finalAmount:String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,13 +31,16 @@ class CalculatorViewController: UIViewController {
 
 
     @IBAction func calculatePressed(_ sender: UIButton) {
-        let billText = enterBillLabel.text
-        if bill != "" {
-            
+        let billText = enterBillLabel.text ?? ""
+        if billText != "",
+           let bill = Double(billText) {
+            let totalBill = bill * (1 + selectedTip)
+            let individualBill = totalBill / Double(numberOfPpl)
+            finalAmount = String(format: "%.2f", individualBill)
+            performSegue(withIdentifier: "goToResult", sender: self)
+        }else{
+            print("Invalid amount inputed")
         }
-        
-        
-        performSegue(withIdentifier: "goToResult", sender: self)
     }
     @IBAction func tipButton(_ sender: UIButton) {
         zeroPercentTipLabel.isSelected = false
@@ -60,5 +64,14 @@ class CalculatorViewController: UIViewController {
     @IBAction func addSubPressed(_ sender: UIStepper) {
         splitBillLabel.text = String(format: "%.0f", sender.value)
         numberOfPpl = Int(sender.value)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToResult" {
+            let destinationVC = segue.destination as! ResultViewController
+            destinationVC.totalAmount = finalAmount
+            destinationVC.tip = selectedTip
+            destinationVC.split = numberOfPpl
+        }
     }
 }
